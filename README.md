@@ -16,7 +16,7 @@ SQL 条件过滤器
 
 [6]: https://github.com/lxzan/fi
 
-[7]: https://codecov.io/github/lxzan/fi/branch/master/graph/badge.svg?token=DJU7YXWN05
+[7]: https://codecov.io/github/lxzan/fi/branch/main/graph/badge.svg?token=uMNEU3cEsM
 
 [8]: https://app.codecov.io/gh/lxzan/fi
 
