@@ -1,4 +1,4 @@
-package filter
+package fi
 
 import (
 	"github.com/lxzan/fi/internal"
@@ -79,6 +79,7 @@ func (c *Filter) addPercent(str string) string {
 	return "%" + str + "%"
 }
 
+// Like 如果value前后不包含百分号, 会自动添加; NotLike同理.
 func (c *Filter) Like(key string, val string) *Filter {
 	return c.push(key, c.addPercent(val), "LIKE")
 }
@@ -99,12 +100,14 @@ func (c *Filter) IsNull(key string) *Filter {
 	return c.push(key, "", "IS NULL")
 }
 
+// Customize 追加自定义SQL
 func (c *Filter) Customize(key string, val ...any) *Filter {
 	c.Expressions = append(c.Expressions, key)
 	c.Args = append(c.Args, val...)
 	return c
 }
 
+// GetExpression 获取SQL表达式
 func (c *Filter) GetExpression() string {
 	if len(c.Expressions) == 0 {
 		return "1=1"

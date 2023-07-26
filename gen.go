@@ -1,4 +1,4 @@
-package filter
+package fi
 
 import (
 	"github.com/lxzan/fi/internal"
@@ -13,7 +13,7 @@ type field struct {
 }
 
 func GetFilter(v any) *Filter {
-	var f = NewFilter()
+	var f = &Filter{Skip: true}
 	var fields = getFields(v)
 	for _, item := range fields {
 		switch item.cmp {

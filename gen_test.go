@@ -1,4 +1,4 @@
-package filter
+package fi
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -67,6 +67,7 @@ func TestGetFilter(t *testing.T) {
 				StartTime: 1,
 				EndTime:   2,
 			},
+			Age:  1,
 			Desc: "aha",
 		}
 		var f1 = GetFilter(template)

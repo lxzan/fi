@@ -1,4 +1,4 @@
-package filter
+package fi
 
 import (
 	"github.com/stretchr/testify/assert"
