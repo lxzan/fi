@@ -58,7 +58,7 @@ func TestGetFilter(t *testing.T) {
 		type Template struct {
 			*TimeSelector
 			Password string  `filter:"-"`
-			Age      int     `filter:" column=age; cmp=lt ;"`
+			Age      int     `filter:" column=age; cmp=lt ;;"`
 			Name     *string `filter:"column=name;"`
 			Desc     string
 		}

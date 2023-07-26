@@ -101,6 +101,7 @@ func TestFilter_IsNull(t *testing.T) {
 }
 
 func TestFilter_Customize(t *testing.T) {
+	assert.Equal(t, "1=1 AND 1=1", NewFilter().Customize("1=1").Customize("1=1").GetExpression())
 	var f = Filter{}
 	var val = "aha"
 	var exp = f.Customize("(first_name LIKE ?) OR (last_name LIKE ?)", val, val).GetExpression()
