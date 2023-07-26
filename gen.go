@@ -14,7 +14,8 @@ type field struct {
 
 func GetFilter(v any) *Filter {
 	var f = &Filter{skip: true}
-	var fields = getFields(v)
+	var g = new(generator)
+	var fields = g.getFields(v)
 	for _, item := range fields {
 		switch item.cmp {
 		case "eq":
@@ -46,13 +47,32 @@ func GetFilter(v any) *Filter {
 	return f
 }
 
-func getFields(v any) []*field {
-	var fields []*field
-	doGetFields(reflect.ValueOf(v), &fields)
+type generator struct {
+	kv [2]string
+}
+
+func (c *generator) split(s string, sep byte, f func(str string)) {
+	n := len(s)
+	start, end := 0, 0
+	for i, _ := range s {
+		if s[i] == sep || i == n-1 {
+			end = i
+			if i == n-1 && s[i] != sep {
+				end++
+			}
+			f(s[start:end])
+			start = i + 1
+		}
+	}
+}
+
+func (c *generator) getFields(v any) []*field {
+	var fields = make([]*field, 0, 5)
+	c.doGetFields(reflect.ValueOf(v), &fields)
 	return fields
 }
 
-func doGetFields(vs reflect.Value, fields *[]*field) {
+func (c *generator) doGetFields(vs reflect.Value, fields *[]*field) {
 	if vs.Kind() == reflect.Ptr {
 		if vs.IsNil() {
 			return
@@ -69,33 +89,41 @@ func doGetFields(vs reflect.Value, fields *[]*field) {
 			continue
 		}
 		if vf.Type().Kind() == reflect.Ptr {
-			doGetFields(vf, fields)
+			c.doGetFields(vf, fields)
 			continue
 		}
-		f := splitTag(tf.Name, tag)
+		f := c.splitTag(tf.Name, tag)
 		f.value = vf.Interface()
 		*fields = append(*fields, f)
 	}
 }
 
-func splitTag(name string, tag string) *field {
+func (c *generator) splitTag(name string, tag string) *field {
 	var f = &field{cmp: "eq"}
-	var arr = strings.Split(tag, ";")
-	for _, item := range arr {
+
+	c.split(tag, ';', func(item string) {
 		item = strings.TrimSpace(item)
 		if item == "" {
-			continue
+			return
 		}
-		var row = strings.SplitN(item, "=", 2)
-		row[0] = strings.TrimSpace(row[0])
-		row[1] = strings.TrimSpace(row[1])
-		switch row[0] {
+
+		i := 0
+		c.kv[0], c.kv[1] = "", ""
+		c.split(item, '=', func(str string) {
+			c.kv[i] = str
+			i++
+		})
+
+		c.kv[0] = strings.TrimSpace(c.kv[0])
+		c.kv[1] = strings.TrimSpace(c.kv[1])
+		switch c.kv[0] {
 		case "column":
-			f.column = row[1]
+			f.column = c.kv[1]
 		case "cmp":
-			f.cmp = row[1]
+			f.cmp = c.kv[1]
 		}
-	}
+	})
+
 	if f.column == "" {
 		f.column = internal.ToSnakeCase(name)
 	}
