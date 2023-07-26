@@ -81,3 +81,34 @@ func TestGetFilter(t *testing.T) {
 		as.Equal(len(f1.Args), len(f2.Args))
 	})
 }
+
+func BenchmarkGetFilter(b *testing.B) {
+	type Template struct {
+		A1  string `filter:"column=a1;cmp=eq"`
+		A2  int    `filter:"column=a2;cmp=not_eq"`
+		A3  int    `filter:"column=a3;cmp=gt"`
+		A4  int    `filter:"column=a4;cmp=lt"`
+		A5  int    `filter:"column=a5;cmp=gte"`
+		A6  int    `filter:"column=a6;cmp=lte"`
+		A7  string `filter:"column=a7;cmp=like"`
+		A8  string `filter:"column=a8;cmp=not_like"`
+		A9  []int  `filter:"column=a9;cmp=in"`
+		A10 []int  `filter:"column=a10;cmp=not_in"`
+	}
+	var template = &Template{
+		A1:  "1",
+		A2:  2,
+		A3:  3,
+		A4:  4,
+		A5:  5,
+		A6:  6,
+		A7:  "7",
+		A8:  "8",
+		A9:  []int{9},
+		A10: []int{10},
+	}
+
+	for i := 0; i < b.N; i++ {
+		GetFilter(template)
+	}
+}

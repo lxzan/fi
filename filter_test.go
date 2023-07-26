@@ -6,7 +6,7 @@ import (
 )
 
 func TestFilter(t *testing.T) {
-	var f = NewFilter().Eq("name", "lee").Gt("age", 0)
+	var f = NewFilter().DisableSkip().Eq("name", "lee").Gt("age", 0)
 	var exp = f.GetExpression()
 	assert.Equal(t, exp, "`name` = ? AND `age` > ?")
 }
@@ -60,7 +60,7 @@ func TestFilter_Like(t *testing.T) {
 	t.Run("", func(t *testing.T) {
 		var f = NewFilter().Like("name", "")
 		var exp = f.GetExpression()
-		assert.Equal(t, exp, "`name` LIKE ?")
+		assert.Equal(t, exp, "1=1")
 	})
 }
 
@@ -109,4 +109,16 @@ func TestFilter_Customize(t *testing.T) {
 
 func TestFilter_GetExpression(t *testing.T) {
 	assert.Equal(t, "1=1", new(Filter).GetExpression())
+}
+
+func TestFilter_WithTimeSelector(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		var f = NewFilter().WithTimeSelector("created_at", 0, 0)
+		assert.Equal(t, "1=1", f.GetExpression())
+	})
+
+	t.Run("", func(t *testing.T) {
+		var f = NewFilter().WithTimeSelector("created_at", 1, 2)
+		assert.Equal(t, "`created_at` >= ? AND `created_at` < ?", f.GetExpression())
+	})
 }

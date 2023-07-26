@@ -13,7 +13,7 @@ type field struct {
 }
 
 func GetFilter(v any) *Filter {
-	var f = &Filter{Skip: true}
+	var f = &Filter{skip: true}
 	var fields = getFields(v)
 	for _, item := range fields {
 		switch item.cmp {

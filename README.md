@@ -4,7 +4,7 @@ SQL 条件过滤器
 
 ### 快速开始
 
-- 结构体标签生成过滤器 (自动跳过空值)
+- 结构体标签反射生成过滤器
 
 ```go
 package main
@@ -32,7 +32,7 @@ func main() {
 // `name` LIKE ? AND `age` <= ? [%caster% 18]
 ```
 
-- 手动构造过滤器 (不自动跳过空值)
+- 手动构造过滤器
 
 ```go
 package main
@@ -57,15 +57,14 @@ func main() {
 	fmt.Printf("%s %v\n", filter.GetExpression(), filter.Args)
 }
 
-// `name` LIKE ? AND `age` <= ? AND `height` = ? [%caster% 18 0]
+// `name` LIKE ? AND `age` <= ? [%caster% 18]
 ```
 
 ### 标签
 
-```go
-type T struct {
-    StartTime   int64  `filter:"column=created_at;cmp=gte"`   // 自定义字段名
-    Password    string `filter:"-"`                           // 跳过
-}
-```
+| 字段   | 描述                                       |
+| ------ | ------------------------------------------ |
+| column | 自定义的字段名; 默认值是下划线风格的字段名 |
+| cmp    | 比较操作符; 默认值是eq                     |
+| -      | 忽略                                       |
 

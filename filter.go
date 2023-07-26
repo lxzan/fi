@@ -6,17 +6,23 @@ import (
 )
 
 type Filter struct {
-	Skip        bool          // 是否跳过空值
+	skip        bool          // 是否跳过空值
 	Expressions []string      // 表达式
 	Args        []interface{} // 参数
 }
 
 func NewFilter() *Filter {
-	return new(Filter)
+	return &Filter{skip: true}
+}
+
+// DisableSkip 关闭自动跳过空值
+func (c *Filter) DisableSkip() *Filter {
+	c.skip = false
+	return c
 }
 
 func (c *Filter) push(key string, val any, cmp string) *Filter {
-	if internal.IsNil(val) || (c.Skip && internal.IsZero(val)) {
+	if internal.IsNil(val) || (c.skip && internal.IsZero(val)) {
 		return c
 	}
 
@@ -105,6 +111,15 @@ func (c *Filter) Customize(key string, val ...any) *Filter {
 	c.Expressions = append(c.Expressions, key)
 	c.Args = append(c.Args, val...)
 	return c
+}
+
+// WithTimeSelector 时间选择器
+// 区间: [startTime, endTime)
+func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *Filter {
+	if startTime+endTime == 0 {
+		return c
+	}
+	return c.Gte(key, startTime).Lt(key, endTime)
 }
 
 // GetExpression 获取SQL表达式
