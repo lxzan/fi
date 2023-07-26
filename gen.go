@@ -1,21 +1,22 @@
 package filter
 
 import (
+	"github.com/lxzan/fi/internal"
 	"reflect"
 	"strings"
 )
 
 type field struct {
-	column   string
-	operator string
-	value    any
+	column string
+	cmp    string
+	value  any
 }
 
 func GetFilter(v any) *Filter {
 	var f = NewFilter()
 	var fields = getFields(v)
 	for _, item := range fields {
-		switch item.operator {
+		switch item.cmp {
 		case "eq":
 			f.Eq(item.column, item.value)
 		case "not_eq":
@@ -45,13 +46,13 @@ func GetFilter(v any) *Filter {
 	return f
 }
 
-func getFields(v any) []field {
-	var fields []field
+func getFields(v any) []*field {
+	var fields []*field
 	doGetFields(reflect.ValueOf(v), &fields)
 	return fields
 }
 
-func doGetFields(vs reflect.Value, fields *[]field) {
+func doGetFields(vs reflect.Value, fields *[]*field) {
 	if vs.Kind() == reflect.Ptr {
 		if vs.IsNil() {
 			return
@@ -77,8 +78,8 @@ func doGetFields(vs reflect.Value, fields *[]field) {
 	}
 }
 
-func splitTag(name string, tag string) field {
-	var f = field{column: name, operator: "eq"}
+func splitTag(name string, tag string) *field {
+	var f = &field{cmp: "eq"}
 	var arr = strings.Split(tag, ";")
 	for _, item := range arr {
 		item = strings.TrimSpace(item)
@@ -91,9 +92,12 @@ func splitTag(name string, tag string) field {
 		switch row[0] {
 		case "column":
 			f.column = row[1]
-		case "op":
-			f.operator = row[1]
+		case "cmp":
+			f.cmp = row[1]
 		}
+	}
+	if f.column == "" {
+		f.column = internal.ToSnakeCase(name)
 	}
 	return f
 }

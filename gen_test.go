@@ -10,16 +10,16 @@ func TestGetFilter(t *testing.T) {
 
 	t.Run("", func(t *testing.T) {
 		type Template struct {
-			A1  string `filter:"column=a1;op=eq"`
-			A2  int    `filter:"column=a2;op=not_eq"`
-			A3  int    `filter:"column=a3;op=gt"`
-			A4  int    `filter:"column=a4;op=lt"`
-			A5  int    `filter:"column=a5;op=gte"`
-			A6  int    `filter:"column=a6;op=lte"`
-			A7  string `filter:"column=a7;op=like"`
-			A8  string `filter:"column=a8;op=not_like"`
-			A9  []int  `filter:"column=a9;op=in"`
-			A10 []int  `filter:"column=a10;op=not_in"`
+			A1  string `filter:"column=a1;cmp=eq"`
+			A2  int    `filter:"column=a2;cmp=not_eq"`
+			A3  int    `filter:"column=a3;cmp=gt"`
+			A4  int    `filter:"column=a4;cmp=lt"`
+			A5  int    `filter:"column=a5;cmp=gte"`
+			A6  int    `filter:"column=a6;cmp=lte"`
+			A7  string `filter:"column=a7;cmp=like"`
+			A8  string `filter:"column=a8;cmp=not_like"`
+			A9  []int  `filter:"column=a9;cmp=in"`
+			A10 []int  `filter:"column=a10;cmp=not_in"`
 		}
 		var template = &Template{
 			A1:  "1",
@@ -51,28 +51,31 @@ func TestGetFilter(t *testing.T) {
 
 	t.Run("", func(t *testing.T) {
 		type TimeSelector struct {
-			StartTime int64 `filter:"column=created_at;op=gte"`
-			EndTime   int64 `filter:"column=created_at;op=lt"`
+			StartTime int64 `filter:"column=created_at;cmp=gte"`
+			EndTime   int64 `filter:"column=created_at;cmp=lt"`
 		}
 
 		type Template struct {
 			*TimeSelector
 			Password string  `filter:"-"`
-			Age      int     `filter:" column=age; op=lt ;"`
+			Age      int     `filter:" column=age; cmp=lt ;"`
 			Name     *string `filter:"column=name;"`
+			Desc     string
 		}
 		var template = Template{
 			TimeSelector: &TimeSelector{
 				StartTime: 1,
 				EndTime:   2,
 			},
+			Desc: "aha",
 		}
 		var f1 = GetFilter(template)
 		var f2 = NewFilter().
 			Gte("created_at", template.StartTime).
 			Lt("created_at", template.EndTime).
 			Lt("age", template.Age).
-			Eq("name", template.Name)
+			Eq("name", template.Name).
+			Eq("desc", template.Desc)
 		as.ElementsMatch(f1.Expressions, f2.Expressions)
 		as.Equal(len(f1.Args), len(f2.Args))
 	})

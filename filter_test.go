@@ -106,3 +106,7 @@ func TestFilter_Customize(t *testing.T) {
 	var exp = f.Customize("(first_name LIKE ?) OR (last_name LIKE ?)", val, val).GetExpression()
 	assert.Equal(t, exp, "(first_name LIKE ?) OR (last_name LIKE ?)")
 }
+
+func TestFilter_GetExpression(t *testing.T) {
+	assert.Equal(t, "1=1", new(Filter).GetExpression())
+}

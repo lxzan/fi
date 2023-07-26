@@ -6,16 +6,17 @@ import (
 )
 
 type Filter struct {
-	Expressions []string
-	Args        []interface{}
+	Skip        bool          // 是否跳过空值
+	Expressions []string      // 表达式
+	Args        []interface{} // 参数
 }
 
 func NewFilter() *Filter {
 	return new(Filter)
 }
 
-func (c *Filter) push(key string, val any, op string) *Filter {
-	if internal.IsNil(val) {
+func (c *Filter) push(key string, val any, cmp string) *Filter {
+	if internal.IsNil(val) || (c.Skip && internal.IsZero(val)) {
 		return c
 	}
 
@@ -29,8 +30,8 @@ func (c *Filter) push(key string, val any, op string) *Filter {
 		builder.WriteString("`")
 	}
 	builder.WriteString(" ")
-	builder.WriteString(op)
-	switch op {
+	builder.WriteString(cmp)
+	switch cmp {
 	case "IN", "NOT IN":
 		builder.WriteString(" (?)")
 		c.Args = append(c.Args, val)
@@ -105,5 +106,8 @@ func (c *Filter) Customize(key string, val ...any) *Filter {
 }
 
 func (c *Filter) GetExpression() string {
+	if len(c.Expressions) == 0 {
+		return "1=1"
+	}
 	return strings.Join(c.Expressions, " AND ")
 }
