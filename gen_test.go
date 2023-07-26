@@ -45,7 +45,7 @@ func TestGetFilter(t *testing.T) {
 			NotLike("a8", template.A8).
 			In("a9", template.A9).
 			NotIn("a10", template.A10)
-		as.ElementsMatch(f1.Expressions, f2.Expressions)
+		as.Equal(f1.GetExpression(), f2.GetExpression())
 		as.Equal(len(f1.Args), len(f2.Args))
 	})
 
@@ -77,7 +77,7 @@ func TestGetFilter(t *testing.T) {
 			Lt("age", template.Age).
 			Eq("name", template.Name).
 			Eq("desc", template.Desc)
-		as.ElementsMatch(f1.Expressions, f2.Expressions)
+		as.Equal(f1.GetExpression(), f2.GetExpression())
 		as.Equal(len(f1.Args), len(f2.Args))
 	})
 }

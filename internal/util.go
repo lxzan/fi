@@ -47,7 +47,7 @@ func IsZero(v any) bool {
 	case bool:
 		return value == false
 	default:
-		return false
+		return reflect.ValueOf(v).IsZero()
 	}
 }
 

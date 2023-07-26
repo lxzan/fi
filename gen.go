@@ -13,7 +13,7 @@ type field struct {
 }
 
 func GetFilter(v any) *Filter {
-	var f = &Filter{skip: true}
+	var f = NewFilter()
 	var g = new(generator)
 	var fields = g.getFields(v)
 	for _, item := range fields {

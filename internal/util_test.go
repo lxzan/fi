@@ -29,12 +29,14 @@ func TestIsNil(t *testing.T) {
 
 func TestIsZero(t *testing.T) {
 	assert.Equal(t, true, IsZero(0))
-	assert.Equal(t, false, IsZero(net.TCPConn{}))
 	assert.Equal(t, true, IsZero(0.000001))
 	assert.Equal(t, true, IsZero(float32(0.000001)))
 	assert.Equal(t, true, IsZero(""))
 	assert.Equal(t, true, IsZero(false))
 	assert.Equal(t, true, IsZero(time.Time{}))
+
+	type Int int
+	assert.Equal(t, true, IsZero(Int(0)))
 }
 
 func TestToSnakeCase(t *testing.T) {

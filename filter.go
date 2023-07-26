@@ -6,9 +6,9 @@ import (
 )
 
 type Filter struct {
-	skip        bool          // 是否跳过空值
-	Expressions []string      // 表达式
-	Args        []interface{} // 参数
+	builder strings.Builder
+	skip    bool          // 是否跳过空值
+	Args    []interface{} // 参数
 }
 
 func NewFilter() *Filter {
@@ -26,27 +26,29 @@ func (c *Filter) push(key string, val any, cmp string) *Filter {
 		return c
 	}
 
+	if c.builder.Len() > 0 {
+		c.builder.WriteString(" AND ")
+	}
+
 	var hasDot = strings.Contains(key, ".")
-	builder := strings.Builder{}
 	if !hasDot {
-		builder.WriteString("`")
+		c.builder.WriteString("`")
 	}
-	builder.WriteString(key)
+	c.builder.WriteString(key)
 	if !hasDot {
-		builder.WriteString("`")
+		c.builder.WriteString("`")
 	}
-	builder.WriteString(" ")
-	builder.WriteString(cmp)
+	c.builder.WriteString(" ")
+	c.builder.WriteString(cmp)
 	switch cmp {
 	case "IN", "NOT IN":
-		builder.WriteString(" (?)")
+		c.builder.WriteString(" (?)")
 		c.Args = append(c.Args, val)
 	case "IS NULL":
 	default:
-		builder.WriteString(" ?")
+		c.builder.WriteString(" ?")
 		c.Args = append(c.Args, val)
 	}
-	c.Expressions = append(c.Expressions, builder.String())
 	return c
 }
 
@@ -107,8 +109,11 @@ func (c *Filter) IsNull(key string) *Filter {
 }
 
 // Customize 追加自定义SQL
-func (c *Filter) Customize(key string, val ...any) *Filter {
-	c.Expressions = append(c.Expressions, key)
+func (c *Filter) Customize(layout string, val ...any) *Filter {
+	if c.builder.Len() > 0 {
+		c.builder.WriteString(" AND ")
+	}
+	c.builder.WriteString(layout)
 	c.Args = append(c.Args, val...)
 	return c
 }
@@ -124,8 +129,8 @@ func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *F
 
 // GetExpression 获取SQL表达式
 func (c *Filter) GetExpression() string {
-	if len(c.Expressions) == 0 {
+	if c.builder.Len() == 0 {
 		return "1=1"
 	}
-	return strings.Join(c.Expressions, " AND ")
+	return c.builder.String()
 }
