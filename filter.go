@@ -1,6 +1,9 @@
 package filter
 
-import "strings"
+import (
+	"github.com/lxzan/fi/internal"
+	"strings"
+)
 
 type Filter struct {
 	Expressions []string
@@ -12,30 +15,39 @@ func NewFilter() *Filter {
 }
 
 func (c *Filter) push(key string, val any, op string) *Filter {
-	if val == nil {
+	if internal.IsNil(val) {
 		return c
 	}
 
+	var hasDot = strings.Contains(key, ".")
 	builder := strings.Builder{}
+	if !hasDot {
+		builder.WriteString("`")
+	}
 	builder.WriteString(key)
+	if !hasDot {
+		builder.WriteString("`")
+	}
 	builder.WriteString(" ")
 	builder.WriteString(op)
 	switch op {
 	case "IN", "NOT IN":
 		builder.WriteString(" (?)")
+		c.Args = append(c.Args, val)
+	case "IS NULL":
 	default:
 		builder.WriteString(" ?")
+		c.Args = append(c.Args, val)
 	}
 	c.Expressions = append(c.Expressions, builder.String())
-	c.Args = append(c.Args, val)
 	return c
 }
 
-func (c *Filter) Equal(key string, val any) *Filter {
+func (c *Filter) Eq(key string, val any) *Filter {
 	return c.push(key, val, "=")
 }
 
-func (c *Filter) NotEqual(key string, val any) *Filter {
+func (c *Filter) NotEq(key string, val any) *Filter {
 	return c.push(key, val, "!=")
 }
 
@@ -74,17 +86,16 @@ func (c *Filter) NotLike(key string, val string) *Filter {
 	return c.push(key, c.addPercent(val), "NOT LIKE")
 }
 
-func (c *Filter) In(key string, val ...any) *Filter {
+func (c *Filter) In(key string, val any) *Filter {
 	return c.push(key, val, "IN")
 }
 
-func (c *Filter) NotIn(key string, val ...any) *Filter {
+func (c *Filter) NotIn(key string, val any) *Filter {
 	return c.push(key, val, "NOT IN")
 }
 
 func (c *Filter) IsNull(key string) *Filter {
-	c.Expressions = append(c.Expressions, key+" IS NULL")
-	return c
+	return c.push(key, "", "IS NULL")
 }
 
 func (c *Filter) Customize(key string, val ...any) *Filter {
