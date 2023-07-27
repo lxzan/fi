@@ -28,7 +28,16 @@ func TestIsNil(t *testing.T) {
 }
 
 func TestIsZero(t *testing.T) {
-	assert.Equal(t, true, IsZero(0))
+	assert.Equal(t, true, IsZero(int(0)))
+	assert.Equal(t, true, IsZero(int64(0)))
+	assert.Equal(t, true, IsZero(int32(0)))
+	assert.Equal(t, true, IsZero(int16(0)))
+	assert.Equal(t, true, IsZero(int8(0)))
+	assert.Equal(t, true, IsZero(uint(0)))
+	assert.Equal(t, true, IsZero(uint64(0)))
+	assert.Equal(t, true, IsZero(uint32(0)))
+	assert.Equal(t, true, IsZero(uint16(0)))
+	assert.Equal(t, true, IsZero(uint8(0)))
 	assert.Equal(t, true, IsZero(0.000001))
 	assert.Equal(t, true, IsZero(float32(0.000001)))
 	assert.Equal(t, true, IsZero(""))
