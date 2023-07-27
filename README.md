@@ -1,6 +1,6 @@
 # fi
 
-SQL 条件过滤器
+动态 SQL 查询条件构造器
 
 [![Build Status][1]][2] [![MIT licensed][3]][4] [![Go Version][5]][6] [![codecov][7]][8] [![Go Report Card][9]][10]
 
@@ -26,7 +26,7 @@ SQL 条件过滤器
 
 ### 快速开始
 
-- 结构体标签反射生成过滤器
+- 反射生成过滤器
 
 ```go
 package main
@@ -75,7 +75,11 @@ func main() {
 		Name: "caster",
 		Age:  18,
 	}
-	var filter = fi.NewFilter().Like("name", v.Name).Lte("age", v.Age).Eq("height", v.Height)
+	var filter = fi.
+		NewFilter().
+		Like("name", v.Name).
+		Lte("age", v.Age).
+		Eq("height", v.Height)
 	fmt.Printf("%s %v\n", filter.GetExpression(), filter.Args)
 }
 
@@ -84,11 +88,26 @@ func main() {
 
 ### 标签
 
-| 字段     | 描述                     |
-|--------|------------------------|
-| column | 自定义的字段名; 默认值是下划线风格的字段名 |
-| cmp    | 比较操作符; 默认值是eq          |
-| -      | 忽略                     |
+| 字段     | 描述                |
+|--------|-------------------|
+| column | 自定义字段名; 默认值是下划线风格 |
+| cmp    | 比较操作符; 默认值是eq     |
+| -      | 忽略                |
+
+### 操作符
+
+| 操作符      | 描述         |
+|----------|------------|
+| eq       | `=`        |
+| not_eq   | `!=`       |
+| gt       | `>`        |
+| lt       | `<`        |
+| gte      | `>=`       |
+| lte      | `<=`       |
+| like     | `LIKE`     |
+| not_like | `NOT LIKE` |
+| in       | `IN`       |
+| not_in   | `NOT IN`   |
 
 ### 性能测试
 
@@ -97,8 +116,8 @@ go test -benchmem -run=^$ -bench ^Benchmark github.com/lxzan/fi
 goos: darwin
 goarch: arm64
 pkg: github.com/lxzan/fi
-BenchmarkGetFilterReflect-8               445311              2671 ns/op            1928 B/op         48 allocs/op
-BenchmarkGetFilterNoReflect-8            1735392               692.3 ns/op          1104 B/op         18 allocs/op
+BenchmarkGetFilterReflect-8               501673              2374 ns/op            1376 B/op         37 allocs/op
+BenchmarkGetFilterNoReflect-8            1650524               721.8 ns/op          1104 B/op         18 allocs/op
 PASS
-ok      github.com/lxzan/fi     4.330s
+ok      github.com/lxzan/fi     4.035s
 ```

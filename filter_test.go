@@ -3,6 +3,7 @@ package fi
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 func TestFilter(t *testing.T) {
@@ -12,9 +13,19 @@ func TestFilter(t *testing.T) {
 }
 
 func TestFilter_Equal(t *testing.T) {
-	var f = Filter{}
-	var exp = f.Eq("name", "lee").GetExpression()
-	assert.Equal(t, exp, "`name` = ?")
+	t.Run("", func(t *testing.T) {
+		var f = Filter{}
+		var exp = f.Eq("name", "lee").GetExpression()
+		assert.Equal(t, exp, "`name` = ?")
+	})
+
+	t.Run("", func(t *testing.T) {
+		var f = Filter{}
+		var timestamp = Timestamp(time.Now().UnixMilli())
+		var exp = f.Eq("timestamp", timestamp).GetExpression()
+		assert.Equal(t, exp, "`timestamp` = ?")
+		assert.Equal(t, int64(timestamp), f.Args[0].(time.Time).UnixMilli())
+	})
 }
 
 func TestFilter_NotEqual(t *testing.T) {
