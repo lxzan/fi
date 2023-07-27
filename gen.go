@@ -15,8 +15,12 @@ type field struct {
 func GetFilter(v any) *Filter {
 	var f = NewFilter()
 	var g = generator{}
+	var vs = reflect.ValueOf(v)
+	if vs.Kind() == reflect.Ptr {
+		vs = vs.Elem()
+	}
 
-	g.getField(reflect.ValueOf(v), func(item *field) {
+	g.getField(vs, func(item *field) {
 		switch item.cmp {
 		case "eq":
 			f.Eq(item.column, item.value)
@@ -68,13 +72,6 @@ func (c *generator) split(s string, sep byte, f func(str string)) {
 }
 
 func (c *generator) getField(vs reflect.Value, callback func(*field)) {
-	if vs.Kind() == reflect.Ptr {
-		if vs.IsNil() {
-			return
-		}
-		vs = vs.Elem()
-	}
-
 	ts := vs.Type()
 	f := &field{}
 
@@ -85,9 +82,17 @@ func (c *generator) getField(vs reflect.Value, callback func(*field)) {
 		if tag == "-" {
 			continue
 		}
+
 		if vf.Type().Kind() == reflect.Ptr {
-			c.getField(vf, callback)
-			continue
+			if vf.IsNil() || internal.IsPrivate(tf.Name) {
+				continue
+			}
+
+			vf = vf.Elem()
+			if vf.Kind() == reflect.Struct {
+				c.getField(vf, callback)
+				continue
+			}
 		}
 
 		c.splitTag(tf.Name, tag, f)

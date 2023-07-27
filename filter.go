@@ -22,6 +22,10 @@ func (c *Filter) DisableSkip() *Filter {
 }
 
 func (c *Filter) push(key string, val any, cmp string) *Filter {
+	if v, ok := val.(Valuer); ok {
+		val = v.Value()
+	}
+
 	if internal.IsNil(val) || (c.skip && internal.IsZero(val)) {
 		return c
 	}
