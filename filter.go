@@ -124,7 +124,11 @@ func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *F
 	if startTime+endTime == 0 {
 		return c
 	}
-	return c.Gte(key, startTime).Lt(key, endTime)
+	skip := c.skip
+	c.skip = false
+	c.Gte(key, startTime).Lt(key, endTime)
+	c.skip = skip
+	return c
 }
 
 // GetExpression 获取SQL表达式

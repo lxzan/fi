@@ -14,9 +14,9 @@ type field struct {
 
 func GetFilter(v any) *Filter {
 	var f = NewFilter()
-	var g = new(generator)
-	var fields = g.getFields(v)
-	for _, item := range fields {
+	var g = generator{}
+
+	g.getField(reflect.ValueOf(v), func(item *field) {
 		switch item.cmp {
 		case "eq":
 			f.Eq(item.column, item.value)
@@ -43,7 +43,8 @@ func GetFilter(v any) *Filter {
 		case "not_in":
 			f.NotIn(item.column, item.value)
 		}
-	}
+	})
+
 	return f
 }
 
@@ -66,13 +67,7 @@ func (c *generator) split(s string, sep byte, f func(str string)) {
 	}
 }
 
-func (c *generator) getFields(v any) []*field {
-	var fields = make([]*field, 0, 5)
-	c.doGetFields(reflect.ValueOf(v), &fields)
-	return fields
-}
-
-func (c *generator) doGetFields(vs reflect.Value, fields *[]*field) {
+func (c *generator) getField(vs reflect.Value, callback func(*field)) {
 	if vs.Kind() == reflect.Ptr {
 		if vs.IsNil() {
 			return
@@ -81,6 +76,8 @@ func (c *generator) doGetFields(vs reflect.Value, fields *[]*field) {
 	}
 
 	ts := vs.Type()
+	f := &field{}
+
 	for i := 0; i < vs.NumField(); i++ {
 		var tf = ts.Field(i)
 		var vf = vs.Field(i)
@@ -89,17 +86,20 @@ func (c *generator) doGetFields(vs reflect.Value, fields *[]*field) {
 			continue
 		}
 		if vf.Type().Kind() == reflect.Ptr {
-			c.doGetFields(vf, fields)
+			c.getField(vf, callback)
 			continue
 		}
-		f := c.splitTag(tf.Name, tag)
+
+		c.splitTag(tf.Name, tag, f)
 		f.value = vf.Interface()
-		*fields = append(*fields, f)
+		callback(f)
 	}
 }
 
-func (c *generator) splitTag(name string, tag string) *field {
-	var f = &field{cmp: "eq"}
+func (c *generator) splitTag(name string, tag string, f *field) {
+	f.cmp = "eq"
+	f.column = ""
+	f.value = nil
 
 	c.split(tag, ';', func(item string) {
 		item = strings.TrimSpace(item)
@@ -129,5 +129,4 @@ func (c *generator) splitTag(name string, tag string) *field {
 	if f.column == "" {
 		f.column = internal.ToSnakeCase(name)
 	}
-	return f
 }
