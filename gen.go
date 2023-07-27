@@ -107,11 +107,13 @@ func (c *generator) splitTag(name string, tag string) *field {
 			return
 		}
 
-		i := 0
+		index := 0
 		c.kv[0], c.kv[1] = "", ""
 		c.split(item, '=', func(str string) {
-			c.kv[i] = str
-			i++
+			if index < 2 {
+				c.kv[index] = str
+			}
+			index++
 		})
 
 		c.kv[0] = strings.TrimSpace(c.kv[0])
