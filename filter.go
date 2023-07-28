@@ -11,14 +11,18 @@ type Filter struct {
 	Args    []interface{} // 参数
 }
 
-func NewFilter() *Filter {
-	return &Filter{skip: true}
-}
+func NewFilter(options ...Option) *Filter {
+	o := &option{SkipZeroValue: true}
+	for _, f := range options {
+		f(o)
+	}
 
-// DisableSkip 关闭自动跳过空值
-func (c *Filter) DisableSkip() *Filter {
-	c.skip = false
-	return c
+	f := &Filter{skip: o.SkipZeroValue}
+	if o.Size > 0 {
+		f.Args = make([]interface{}, 0, o.Size)
+		f.builder.Grow(20 * o.Size)
+	}
+	return f
 }
 
 func (c *Filter) push(key string, val any, cmp string) *Filter {
@@ -141,4 +145,25 @@ func (c *Filter) GetExpression() string {
 		return "1=1"
 	}
 	return c.builder.String()
+}
+
+type (
+	Option func(*option)
+
+	option struct {
+		SkipZeroValue bool
+		Size          int
+	}
+)
+
+func WithSkipZeroValue(skip bool) Option {
+	return func(o *option) {
+		o.SkipZeroValue = skip
+	}
+}
+
+func WithSize(size int) Option {
+	return func(o *option) {
+		o.Size = size
+	}
 }

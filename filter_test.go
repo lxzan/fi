@@ -7,7 +7,7 @@ import (
 )
 
 func TestFilter(t *testing.T) {
-	var f = NewFilter().DisableSkip().Eq("name", "lee").Gt("age", 0)
+	var f = NewFilter(WithSkipZeroValue(false)).Eq("name", "lee").Gt("age", 0)
 	var exp = f.GetExpression()
 	assert.Equal(t, exp, "`name` = ? AND `age` > ?")
 }
@@ -133,4 +133,23 @@ func TestFilter_WithTimeSelector(t *testing.T) {
 		var f = NewFilter().WithTimeSelector("created_at", 1, 2)
 		assert.Equal(t, "`created_at` >= ? AND `created_at` < ?", f.GetExpression())
 	})
+}
+
+func TestWithSkipZeroValue(t *testing.T) {
+	f1 := NewFilter(WithSkipZeroValue(true))
+	assert.True(t, f1.skip)
+
+	f2 := NewFilter(WithSkipZeroValue(false))
+	assert.False(t, f2.skip)
+
+	f3 := NewFilter()
+	assert.True(t, f3.skip)
+}
+
+func TestWithSize(t *testing.T) {
+	f1 := NewFilter()
+	assert.Equal(t, 0, cap(f1.Args))
+
+	f2 := NewFilter(WithSize(10))
+	assert.Equal(t, 10, cap(f2.Args))
 }
