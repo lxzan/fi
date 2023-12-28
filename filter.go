@@ -3,11 +3,13 @@ package fi
 import (
 	"github.com/lxzan/fi/internal"
 	"strings"
+	"time"
 )
 
 type Filter struct {
 	builder strings.Builder
 	skip    bool          // 是否跳过空值
+	quote   bool          // 是否加反引号
 	Args    []interface{} // 参数
 }
 
@@ -39,11 +41,11 @@ func (c *Filter) push(key string, val any, cmp string) *Filter {
 	}
 
 	var hasDot = strings.Contains(key, ".")
-	if !hasDot {
+	if !hasDot && c.quote {
 		c.builder.WriteString("`")
 	}
 	c.builder.WriteString(key)
-	if !hasDot {
+	if !hasDot && c.quote {
 		c.builder.WriteString("`")
 	}
 	c.builder.WriteString(" ")
@@ -126,7 +128,7 @@ func (c *Filter) Customize(layout string, val ...any) *Filter {
 	return c
 }
 
-// WithTimeSelector 时间选择器
+// WithTimeSelector 时间选择器, 毫秒时间戳
 // 区间: [startTime, endTime)
 func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *Filter {
 	if startTime+endTime == 0 {
@@ -134,7 +136,7 @@ func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *F
 	}
 	skip := c.skip
 	c.skip = false
-	c.Gte(key, startTime).Lt(key, endTime)
+	c.Gte(key, time.UnixMilli(startTime)).Lt(key, time.UnixMilli(endTime))
 	c.skip = skip
 	return c
 }
@@ -153,6 +155,7 @@ type (
 	option struct {
 		SkipZeroValue bool
 		Size          int
+		Quote         bool
 	}
 )
 
@@ -165,5 +168,11 @@ func WithSkipZeroValue(skip bool) Option {
 func WithSize(size int) Option {
 	return func(o *option) {
 		o.Size = size
+	}
+}
+
+func WithQuote(enabled bool) Option {
+	return func(o *option) {
+		o.Quote = enabled
 	}
 }
