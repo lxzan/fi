@@ -1,7 +1,7 @@
 package fi
 
 import (
-	"github.com/lxzan/fi/internal"
+	"official-bk/internal/utils/fi/internal"
 	"reflect"
 	"strings"
 )

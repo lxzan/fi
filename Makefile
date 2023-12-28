@@ -5,4 +5,4 @@ cover:
 	go test -coverprofile=./bin/cover.out --cover ./...
 
 bench:
-	go test -benchmem -run=^$$ -bench ^Benchmark github.com/lxzan/fi
+	go test -benchmem -run=^$$ -bench ^Benchmark official-bk/internal/utils/fi

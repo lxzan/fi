@@ -1,13 +1,14 @@
 package fi
 
 import (
-	"github.com/lxzan/fi/internal"
+	"official-bk/internal/utils/fi/internal"
 	"strings"
 )
 
 type Filter struct {
 	builder strings.Builder
 	skip    bool          // 是否跳过空值
+	quote   bool          // 是否加引号
 	Args    []interface{} // 参数
 }
 
@@ -39,11 +40,11 @@ func (c *Filter) push(key string, val any, cmp string) *Filter {
 	}
 
 	var hasDot = strings.Contains(key, ".")
-	if !hasDot {
+	if !hasDot && c.quote {
 		c.builder.WriteString("`")
 	}
 	c.builder.WriteString(key)
-	if !hasDot {
+	if !hasDot && c.quote {
 		c.builder.WriteString("`")
 	}
 	c.builder.WriteString(" ")
@@ -153,6 +154,7 @@ type (
 	option struct {
 		SkipZeroValue bool
 		Size          int
+		Quote         bool
 	}
 )
 
@@ -165,5 +167,11 @@ func WithSkipZeroValue(skip bool) Option {
 func WithSize(size int) Option {
 	return func(o *option) {
 		o.Size = size
+	}
+}
+
+func WithQuote(enabled bool) Option {
+	return func(o *option) {
+		o.Quote = enabled
 	}
 }

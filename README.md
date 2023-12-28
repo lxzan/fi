@@ -4,9 +4,9 @@
 
 [![Build Status][1]][2] [![MIT licensed][3]][4] [![Go Version][5]][6] [![codecov][7]][8] [![Go Report Card][9]][10]
 
-[1]: https://github.com/lxzan/fi/workflows/Go%20Test/badge.svg?branch=main
+[1]: https://official-bk/internal/utils/fi/workflows/Go%20Test/badge.svg?branch=main
 
-[2]: https://github.com/lxzan/fi/actions?query=branch%3Amain
+[2]: https://official-bk/internal/utils/fi/actions?query=branch%3Amain
 
 [3]: https://img.shields.io/badge/license-MIT-blue.svg
 
@@ -14,15 +14,15 @@
 
 [5]: https://img.shields.io/badge/go-%3E%3D1.18-30dff3?style=flat-square&logo=go
 
-[6]: https://github.com/lxzan/fi
+[6]: https://official-bk/internal/utils/fi
 
 [7]: https://codecov.io/github/lxzan/fi/branch/main/graph/badge.svg?token=uMNEU3cEsM
 
 [8]: https://app.codecov.io/gh/lxzan/fi
 
-[9]: https://goreportcard.com/badge/github.com/lxzan/fi
+[9]: https://goreportcard.com/badge/official-bk/internal/utils/fi
 
-[10]: https://goreportcard.com/report/github.com/lxzan/fi
+[10]: https://goreportcard.com/report/official-bk/internal/utils/fi
 
 ### 快速开始
 
@@ -33,7 +33,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lxzan/fi"
+	"official-bk/internal/utils/fi"
 )
 
 type Template struct {
@@ -61,7 +61,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lxzan/fi"
+	"official-bk/internal/utils/fi"
 )
 
 type Template struct {
@@ -112,12 +112,12 @@ func main() {
 ### 性能测试
 
 ```
-go test -benchmem -run=^$ -bench ^Benchmark github.com/lxzan/fi
+go test -benchmem -run=^$ -bench ^Benchmark official-bk/internal/utils/fi
 goos: darwin
 goarch: arm64
-pkg: github.com/lxzan/fi
+pkg: official-bk/internal/utils/fi
 BenchmarkGetFilterReflect-8               501673              2374 ns/op            1376 B/op         37 allocs/op
 BenchmarkGetFilterNoReflect-8            1650524               721.8 ns/op          1104 B/op         18 allocs/op
 PASS
-ok      github.com/lxzan/fi     4.035s
+ok      official-bk/internal/utils/fi     4.035s
 ```
