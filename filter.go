@@ -8,18 +8,17 @@ import (
 
 type Filter struct {
 	builder strings.Builder
-	skip    bool          // 是否跳过空值
-	quote   bool          // 是否加反引号
+	conf    *option
 	Args    []interface{} // 参数
 }
 
 func NewFilter(options ...Option) *Filter {
-	o := &option{SkipZeroValue: true}
+	o := &option{SkipZeroValue: true, Size: 10}
 	for _, f := range options {
 		f(o)
 	}
 
-	f := &Filter{skip: o.SkipZeroValue}
+	f := &Filter{conf: o}
 	if o.Size > 0 {
 		f.Args = make([]interface{}, 0, o.Size)
 		f.builder.Grow(20 * o.Size)
@@ -32,8 +31,10 @@ func (c *Filter) push(key string, val any, cmp string) *Filter {
 		val = v.Value()
 	}
 
-	if internal.IsNil(val) || (c.skip && internal.IsZero(val)) {
-		return c
+	if cmp != "IS NULL" {
+		if internal.IsNil(val) || (c.conf.SkipZeroValue && internal.IsZero(val)) {
+			return c
+		}
 	}
 
 	if c.builder.Len() > 0 {
@@ -41,11 +42,11 @@ func (c *Filter) push(key string, val any, cmp string) *Filter {
 	}
 
 	var hasDot = strings.Contains(key, ".")
-	if !hasDot && c.quote {
+	if !hasDot && c.conf.Quote {
 		c.builder.WriteString("`")
 	}
 	c.builder.WriteString(key)
-	if !hasDot && c.quote {
+	if !hasDot && c.conf.Quote {
 		c.builder.WriteString("`")
 	}
 	c.builder.WriteString(" ")
@@ -134,10 +135,10 @@ func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *F
 	if startTime+endTime == 0 {
 		return c
 	}
-	skip := c.skip
-	c.skip = false
+	skip := c.conf.SkipZeroValue
+	c.conf.SkipZeroValue = false
 	c.Gte(key, time.UnixMilli(startTime)).Lt(key, time.UnixMilli(endTime))
-	c.skip = skip
+	c.conf.SkipZeroValue = skip
 	return c
 }
 
@@ -153,15 +154,15 @@ type (
 	Option func(*option)
 
 	option struct {
-		SkipZeroValue bool
-		Size          int
-		Quote         bool
+		SkipZeroValue bool // 是否跳过空值
+		Size          int  // 是否加反引号
+		Quote         bool // 预估字段数量
 	}
 )
 
-func WithSkipZeroValue(skip bool) Option {
+func WithSkipZeroValue(enabled bool) Option {
 	return func(o *option) {
-		o.SkipZeroValue = skip
+		o.SkipZeroValue = enabled
 	}
 }
 
