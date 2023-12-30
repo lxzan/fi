@@ -33,8 +33,17 @@ func NewFilter(options ...Option) *Filter {
 
 // NewQuery 新建查询
 // 默认不跳过零值, 用于拼接静态查询条件
-func NewQuery() *Filter {
-	return NewFilter(WithSkipZeroValue(false))
+func NewQuery(options ...Option) *Filter {
+	n := len(options)
+	switch n {
+	case 0:
+		return NewFilter(WithSkipZeroValue(false))
+	default:
+		opts := make([]Option, 0, 1+len(options))
+		opts = append(opts, WithSkipZeroValue(false))
+		opts = append(opts, options...)
+		return NewFilter(opts...)
+	}
 }
 
 func (c *Filter) push(key string, val any, cmp string) *Filter {

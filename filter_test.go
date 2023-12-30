@@ -176,5 +176,12 @@ func TestNewQuery(t *testing.T) {
 	t.Run("", func(t *testing.T) {
 		f := NewFilter()
 		assert.Equal(t, f.conf.SkipZeroValue, true)
+		assert.Equal(t, f.conf.Size, 10)
+	})
+
+	t.Run("", func(t *testing.T) {
+		f := NewQuery(WithSize(3))
+		assert.Equal(t, f.conf.SkipZeroValue, false)
+		assert.Equal(t, f.conf.Size, 3)
 	})
 }
