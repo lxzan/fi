@@ -12,8 +12,13 @@ type Filter struct {
 	Args    []interface{} // 参数
 }
 
+// NewFilter 新建过滤器
+// 默认会跳过零值, 用于动态查询条件
 func NewFilter(options ...Option) *Filter {
-	o := &option{SkipZeroValue: true, Size: 10}
+	o := &option{SkipZeroValue: true, Size: 10, Quote: true}
+	if __driver == DriverPostgreSQL {
+		o.Quote = false
+	}
 	for _, f := range options {
 		f(o)
 	}
@@ -24,6 +29,12 @@ func NewFilter(options ...Option) *Filter {
 		f.builder.Grow(20 * o.Size)
 	}
 	return f
+}
+
+// NewQuery 新建查询
+// 默认不跳过零值, 用于拼接静态查询条件
+func NewQuery() *Filter {
+	return NewFilter(WithSkipZeroValue(false))
 }
 
 func (c *Filter) push(key string, val any, cmp string) *Filter {
@@ -148,32 +159,4 @@ func (c *Filter) GetExpression() string {
 		return "1=1"
 	}
 	return c.builder.String()
-}
-
-type (
-	Option func(*option)
-
-	option struct {
-		SkipZeroValue bool // 是否跳过空值
-		Size          int  // 是否加反引号
-		Quote         bool // 预估字段数量
-	}
-)
-
-func WithSkipZeroValue(enabled bool) Option {
-	return func(o *option) {
-		o.SkipZeroValue = enabled
-	}
-}
-
-func WithSize(size int) Option {
-	return func(o *option) {
-		o.Size = size
-	}
-}
-
-func WithQuote(enabled bool) Option {
-	return func(o *option) {
-		o.Quote = enabled
-	}
 }

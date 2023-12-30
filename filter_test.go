@@ -153,3 +153,28 @@ func TestWithSize(t *testing.T) {
 	f2 := NewFilter(WithSize(20))
 	assert.Equal(t, 20, cap(f2.Args))
 }
+
+func TestSetDriver(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		f := NewFilter()
+		assert.Equal(t, f.conf.Quote, true)
+	})
+
+	t.Run("", func(t *testing.T) {
+		SetDriver(DriverPostgreSQL)
+		f := NewFilter()
+		assert.Equal(t, f.conf.Quote, false)
+	})
+}
+
+func TestNewQuery(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		f := NewQuery()
+		assert.Equal(t, f.conf.SkipZeroValue, false)
+	})
+
+	t.Run("", func(t *testing.T) {
+		f := NewFilter()
+		assert.Equal(t, f.conf.SkipZeroValue, true)
+	})
+}
