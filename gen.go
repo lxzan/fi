@@ -78,7 +78,7 @@ func (c *generator) getField(vs reflect.Value, callback func(*field)) {
 	for i := 0; i < vs.NumField(); i++ {
 		var tf = ts.Field(i)
 		var vf = vs.Field(i)
-		var tag = tf.Tag.Get("filter")
+		var tag = tf.Tag.Get("fi")
 		if tag == "-" {
 			continue
 		}

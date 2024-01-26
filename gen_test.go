@@ -10,16 +10,16 @@ func TestGetFilter(t *testing.T) {
 
 	t.Run("", func(t *testing.T) {
 		type Template struct {
-			A1  string `filter:"column=a1;cmp=eq"`
-			A2  int    `filter:"column=a2;cmp=not_eq"`
-			A3  int    `filter:"column=a3;cmp=gt"`
-			A4  int    `filter:"column=a4;cmp=lt"`
-			A5  int    `filter:"column=a5;cmp=gte"`
-			A6  int    `filter:"column=a6;cmp=lte"`
-			A7  string `filter:"column=a7;cmp=like"`
-			A8  string `filter:"column=a8;cmp=not_like"`
-			A9  []int  `filter:"column=a9;cmp=in"`
-			A10 []int  `filter:"column=a10;cmp=not_in"`
+			A1  string `fi:"column=a1;cmp=eq"`
+			A2  int    `fi:"column=a2;cmp=not_eq"`
+			A3  int    `fi:"column=a3;cmp=gt"`
+			A4  int    `fi:"column=a4;cmp=lt"`
+			A5  int    `fi:"column=a5;cmp=gte"`
+			A6  int    `fi:"column=a6;cmp=lte"`
+			A7  string `fi:"column=a7;cmp=like"`
+			A8  string `fi:"column=a8;cmp=not_like"`
+			A9  []int  `fi:"column=a9;cmp=in"`
+			A10 []int  `fi:"column=a10;cmp=not_in"`
 		}
 		var template = &Template{
 			A1:  "1",
@@ -51,15 +51,15 @@ func TestGetFilter(t *testing.T) {
 
 	t.Run("", func(t *testing.T) {
 		type TimeSelector struct {
-			StartTime int64 `filter:"column=created_at;cmp=gte"`
-			EndTime   int64 `filter:"column=created_at;cmp=lt"`
+			StartTime int64 `fi:"column=created_at;cmp=gte"`
+			EndTime   int64 `fi:"column=created_at;cmp=lt"`
 		}
 
 		type Template struct {
 			*TimeSelector
-			Password string  `filter:"-"`
-			Age      int     `filter:" column=age; cmp=lt ;;"`
-			Name     *string `filter:"column=name;"`
+			Password string  `fi:"-"`
+			Age      int     `fi:" column=age; cmp=lt ;;"`
+			Name     *string `fi:"column=name;"`
 			Desc     string
 		}
 		var template = Template{
@@ -84,16 +84,16 @@ func TestGetFilter(t *testing.T) {
 
 func BenchmarkGetFilterReflect(b *testing.B) {
 	type Template struct {
-		A1  string `filter:"column=a1;cmp=eq"`
-		A2  int    `filter:"column=a2;cmp=not_eq"`
-		A3  int    `filter:"column=a3;cmp=gt"`
-		A4  int    `filter:"column=a4;cmp=lt"`
-		A5  int    `filter:"column=a5;cmp=gte"`
-		A6  int    `filter:"column=a6;cmp=lte"`
-		A7  string `filter:"column=a7;cmp=like"`
-		A8  string `filter:"column=a8;cmp=not_like"`
-		A9  []int  `filter:"column=a9;cmp=in"`
-		A10 []int  `filter:"column=a10;cmp=not_in"`
+		A1  string `fi:"column=a1;cmp=eq"`
+		A2  int    `fi:"column=a2;cmp=not_eq"`
+		A3  int    `fi:"column=a3;cmp=gt"`
+		A4  int    `fi:"column=a4;cmp=lt"`
+		A5  int    `fi:"column=a5;cmp=gte"`
+		A6  int    `fi:"column=a6;cmp=lte"`
+		A7  string `fi:"column=a7;cmp=like"`
+		A8  string `fi:"column=a8;cmp=not_like"`
+		A9  []int  `fi:"column=a9;cmp=in"`
+		A10 []int  `fi:"column=a10;cmp=not_in"`
 	}
 	var template = &Template{
 		A1:  "1",
@@ -115,16 +115,16 @@ func BenchmarkGetFilterReflect(b *testing.B) {
 
 func BenchmarkGetFilterNoReflect(b *testing.B) {
 	type Template struct {
-		A1  string `filter:"column=a1;cmp=eq"`
-		A2  int    `filter:"column=a2;cmp=not_eq"`
-		A3  int    `filter:"column=a3;cmp=gt"`
-		A4  int    `filter:"column=a4;cmp=lt"`
-		A5  int    `filter:"column=a5;cmp=gte"`
-		A6  int    `filter:"column=a6;cmp=lte"`
-		A7  string `filter:"column=a7;cmp=like"`
-		A8  string `filter:"column=a8;cmp=not_like"`
-		A9  []int  `filter:"column=a9;cmp=in"`
-		A10 []int  `filter:"column=a10;cmp=not_in"`
+		A1  string `fi:"column=a1;cmp=eq"`
+		A2  int    `fi:"column=a2;cmp=not_eq"`
+		A3  int    `fi:"column=a3;cmp=gt"`
+		A4  int    `fi:"column=a4;cmp=lt"`
+		A5  int    `fi:"column=a5;cmp=gte"`
+		A6  int    `fi:"column=a6;cmp=lte"`
+		A7  string `fi:"column=a7;cmp=like"`
+		A8  string `fi:"column=a8;cmp=not_like"`
+		A9  []int  `fi:"column=a9;cmp=in"`
+		A10 []int  `fi:"column=a10;cmp=not_in"`
 	}
 	var template = &Template{
 		A1:  "1",
