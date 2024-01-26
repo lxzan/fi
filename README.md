@@ -37,8 +37,8 @@ import (
 )
 
 type Template struct {
-	Name   string `filter:"cmp=like"`
-	Age    int    `filter:"cmp=lte"`
+	Name   string `fi:"cmp=like"`
+	Age    int    `fi:"cmp=lte"`
 	Height int
 }
 
@@ -65,8 +65,8 @@ import (
 )
 
 type Template struct {
-	Name   string `filter:"cmp=like"`
-	Age    int    `filter:"cmp=lte"`
+	Name   string `fi:"cmp=like"`
+	Age    int    `fi:"cmp=lte"`
 	Height int
 }
 
@@ -113,11 +113,12 @@ func main() {
 
 ```
 go test -benchmem -run=^$ -bench ^Benchmark github.com/lxzan/fi
-goos: darwin
-goarch: arm64
+goos: windows
+goarch: amd64
 pkg: github.com/lxzan/fi
-BenchmarkGetFilterReflect-8               501673              2374 ns/op            1376 B/op         37 allocs/op
-BenchmarkGetFilterNoReflect-8            1650524               721.8 ns/op          1104 B/op         18 allocs/op
+cpu: 13th Gen Intel(R) Core(TM) i5-1340P
+BenchmarkGetFilterReflect-16              487071              2249 ns/op             768 B/op         29 allocs/op
+BenchmarkGetFilterNoReflect-16           2214118               569.0 ns/op           558 B/op         11 allocs/op
 PASS
-ok      github.com/lxzan/fi     4.035s
+ok      github.com/lxzan/fi     3.318s
 ```

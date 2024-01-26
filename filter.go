@@ -3,21 +3,27 @@ package fi
 import (
 	"github.com/lxzan/fi/internal"
 	"strings"
+	"time"
 )
 
 type Filter struct {
 	builder strings.Builder
-	skip    bool          // 是否跳过空值
+	conf    *option
 	Args    []interface{} // 参数
 }
 
+// NewFilter 新建过滤器
+// 默认会跳过零值, 用于动态查询条件
 func NewFilter(options ...Option) *Filter {
-	o := &option{SkipZeroValue: true}
+	o := &option{SkipZeroValue: true, Size: 10, Quote: true}
+	if __driver == DriverPostgreSQL {
+		o.Quote = false
+	}
 	for _, f := range options {
 		f(o)
 	}
 
-	f := &Filter{skip: o.SkipZeroValue}
+	f := &Filter{conf: o}
 	if o.Size > 0 {
 		f.Args = make([]interface{}, 0, o.Size)
 		f.builder.Grow(20 * o.Size)
@@ -25,13 +31,30 @@ func NewFilter(options ...Option) *Filter {
 	return f
 }
 
+// NewQuery 新建查询
+// 默认不跳过零值, 用于拼接静态查询条件
+func NewQuery(options ...Option) *Filter {
+	n := len(options)
+	switch n {
+	case 0:
+		return NewFilter(WithSkipZeroValue(false))
+	default:
+		opts := make([]Option, 0, 1+len(options))
+		opts = append(opts, WithSkipZeroValue(false))
+		opts = append(opts, options...)
+		return NewFilter(opts...)
+	}
+}
+
 func (c *Filter) push(key string, val any, cmp string) *Filter {
 	if v, ok := val.(Valuer); ok {
 		val = v.Value()
 	}
 
-	if internal.IsNil(val) || (c.skip && internal.IsZero(val)) {
-		return c
+	if cmp != "IS NULL" {
+		if internal.IsNil(val) || (c.conf.SkipZeroValue && internal.IsZero(val)) {
+			return c
+		}
 	}
 
 	if c.builder.Len() > 0 {
@@ -39,11 +62,11 @@ func (c *Filter) push(key string, val any, cmp string) *Filter {
 	}
 
 	var hasDot = strings.Contains(key, ".")
-	if !hasDot {
+	if !hasDot && c.conf.Quote {
 		c.builder.WriteString("`")
 	}
 	c.builder.WriteString(key)
-	if !hasDot {
+	if !hasDot && c.conf.Quote {
 		c.builder.WriteString("`")
 	}
 	c.builder.WriteString(" ")
@@ -126,16 +149,16 @@ func (c *Filter) Customize(layout string, val ...any) *Filter {
 	return c
 }
 
-// WithTimeSelector 时间选择器
+// WithTimeSelector 时间选择器, 毫秒时间戳
 // 区间: [startTime, endTime)
 func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *Filter {
 	if startTime+endTime == 0 {
 		return c
 	}
-	skip := c.skip
-	c.skip = false
-	c.Gte(key, startTime).Lt(key, endTime)
-	c.skip = skip
+	skip := c.conf.SkipZeroValue
+	c.conf.SkipZeroValue = false
+	c.Gte(key, time.UnixMilli(startTime)).Lt(key, time.UnixMilli(endTime))
+	c.conf.SkipZeroValue = skip
 	return c
 }
 
@@ -145,25 +168,4 @@ func (c *Filter) GetExpression() string {
 		return "1=1"
 	}
 	return c.builder.String()
-}
-
-type (
-	Option func(*option)
-
-	option struct {
-		SkipZeroValue bool
-		Size          int
-	}
-)
-
-func WithSkipZeroValue(skip bool) Option {
-	return func(o *option) {
-		o.SkipZeroValue = skip
-	}
-}
-
-func WithSize(size int) Option {
-	return func(o *option) {
-		o.Size = size
-	}
 }
