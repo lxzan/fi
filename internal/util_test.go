@@ -3,6 +3,7 @@ package internal
 import (
 	"github.com/stretchr/testify/assert"
 	"net"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -13,39 +14,52 @@ func TestSelectValue(t *testing.T) {
 }
 
 func TestIsNil(t *testing.T) {
-	assert.Equal(t, true, IsNil(nil))
-	assert.Equal(t, false, IsNil(1))
+	var isNil = func(v any) bool {
+		return IsNil(v, reflect.ValueOf(v))
+	}
+
+	assert.Equal(t, true, isNil(nil))
+	assert.Equal(t, false, isNil(1))
 
 	var arr []int
-	assert.Equal(t, true, IsNil(arr))
+	assert.Equal(t, true, isNil(arr))
 
 	var num *int
-	assert.Equal(t, true, IsNil(num))
+	assert.Equal(t, true, isNil(num))
 
 	var tcpConn *net.TCPConn
 	var conn net.Conn = tcpConn
-	assert.Equal(t, true, IsNil(conn))
+	assert.Equal(t, true, isNil(conn))
+
+	t.Run("", func(t *testing.T) {
+		var arr = make([]int, 0)
+		assert.Equal(t, false, isNil(arr))
+	})
 }
 
 func TestIsZero(t *testing.T) {
-	assert.Equal(t, true, IsZero(int(0)))
-	assert.Equal(t, true, IsZero(int64(0)))
-	assert.Equal(t, true, IsZero(int32(0)))
-	assert.Equal(t, true, IsZero(int16(0)))
-	assert.Equal(t, true, IsZero(int8(0)))
-	assert.Equal(t, true, IsZero(uint(0)))
-	assert.Equal(t, true, IsZero(uint64(0)))
-	assert.Equal(t, true, IsZero(uint32(0)))
-	assert.Equal(t, true, IsZero(uint16(0)))
-	assert.Equal(t, true, IsZero(uint8(0)))
-	assert.Equal(t, true, IsZero(0.000001))
-	assert.Equal(t, true, IsZero(float32(0.000001)))
-	assert.Equal(t, true, IsZero(""))
-	assert.Equal(t, true, IsZero(false))
-	assert.Equal(t, true, IsZero(time.Time{}))
+	var isZero = func(v any) bool {
+		return IsZero(v, reflect.ValueOf(v))
+	}
+
+	assert.Equal(t, true, isZero(int(0)))
+	assert.Equal(t, true, isZero(int64(0)))
+	assert.Equal(t, true, isZero(int32(0)))
+	assert.Equal(t, true, isZero(int16(0)))
+	assert.Equal(t, true, isZero(int8(0)))
+	assert.Equal(t, true, isZero(uint(0)))
+	assert.Equal(t, true, isZero(uint64(0)))
+	assert.Equal(t, true, isZero(uint32(0)))
+	assert.Equal(t, true, isZero(uint16(0)))
+	assert.Equal(t, true, isZero(uint8(0)))
+	assert.Equal(t, true, isZero(0.000001))
+	assert.Equal(t, true, isZero(float32(0.000001)))
+	assert.Equal(t, true, isZero(""))
+	assert.Equal(t, true, isZero(false))
+	assert.Equal(t, true, isZero(time.Time{}))
 
 	type Int int
-	assert.Equal(t, true, IsZero(Int(0)))
+	assert.Equal(t, true, isZero(Int(0)))
 }
 
 func TestToSnakeCase(t *testing.T) {

@@ -16,23 +16,20 @@ func SelectValue[T any](ok bool, a, b T) T {
 	return b
 }
 
-func IsNil(v interface{}) bool {
+func IsNil(v any, rv reflect.Value) bool {
 	if v == nil {
 		return true
 	}
 
-	rv := reflect.ValueOf(v)
 	switch rv.Kind() {
-	case reflect.Ptr:
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Pointer, reflect.Slice, reflect.Interface:
 		return rv.IsNil()
-	case reflect.Slice:
-		return rv.Len() == 0
 	default:
-		return false
+		return v == nil
 	}
 }
 
-func IsZero(v any) bool {
+func IsZero(v any, rv reflect.Value) bool {
 	switch value := v.(type) {
 	case int:
 		return value == 0
@@ -65,7 +62,7 @@ func IsZero(v any) bool {
 	case bool:
 		return value == false
 	default:
-		return reflect.ValueOf(v).IsZero()
+		return rv.IsZero()
 	}
 }
 
