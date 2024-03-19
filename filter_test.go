@@ -33,6 +33,22 @@ func TestFilter_NotEqual(t *testing.T) {
 	assert.Equal(t, exp, "`name` != ?")
 }
 
+func TestFilter_Merge(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		var f1 = NewQuery().Eq("name", "caster")
+		var f2 = NewQuery().Eq("age", 12)
+		var exp = f1.Merge(f2).GetExpression()
+		assert.Equal(t, exp, "`name` = ? AND `age` = ?")
+	})
+
+	t.Run("", func(t *testing.T) {
+		var f1 = NewQuery().Eq("name", "caster")
+		var f2 = NewQuery()
+		var exp = f1.Merge(f2).GetExpression()
+		assert.Equal(t, exp, "`name` = ?")
+	})
+}
+
 func TestFilter_Gt(t *testing.T) {
 	var exp = NewFilter(WithQuote(true)).Gt("age", 1).GetExpression()
 	assert.Equal(t, exp, "`age` > ?")

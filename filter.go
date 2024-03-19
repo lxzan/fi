@@ -2,6 +2,7 @@ package fi
 
 import (
 	"github.com/lxzan/fi/internal"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -9,7 +10,7 @@ import (
 type Filter struct {
 	builder strings.Builder
 	conf    *option
-	Args    []interface{} // 参数
+	Args    []any // 参数
 }
 
 // NewFilter 新建过滤器
@@ -24,9 +25,9 @@ func NewFilter(options ...Option) *Filter {
 	}
 
 	f := &Filter{conf: o}
+	f.builder.Grow(256)
 	if o.Size > 0 {
-		f.Args = make([]interface{}, 0, o.Size)
-		f.builder.Grow(20 * o.Size)
+		f.Args = make([]any, 0, o.Size)
 	}
 	return f
 }
@@ -51,8 +52,9 @@ func (c *Filter) push(key string, val any, cmp string) *Filter {
 		val = v.Value()
 	}
 
-	if cmp != "IS NULL" {
-		if internal.IsNil(val) || (c.conf.SkipZeroValue && internal.IsZero(val)) {
+	if cmp != "IS NULL" && c.conf.SkipZeroValue {
+		var rv = reflect.ValueOf(val)
+		if internal.IsNil(val, rv) || internal.IsZero(val, rv) {
 			return c
 		}
 	}
@@ -81,6 +83,11 @@ func (c *Filter) push(key string, val any, cmp string) *Filter {
 		c.Args = append(c.Args, val)
 	}
 	return c
+}
+
+// IsEmpty 查询条件是否为空
+func (c *Filter) IsEmpty() bool {
+	return c.builder.Len() == 0
 }
 
 func (c *Filter) Eq(key string, val any) *Filter {
@@ -149,6 +156,14 @@ func (c *Filter) Customize(layout string, val ...any) *Filter {
 	return c
 }
 
+// Merge 合并过滤器
+func (c *Filter) Merge(f *Filter) *Filter {
+	if !f.IsEmpty() {
+		return c.Customize(f.GetExpression(), f.Args...)
+	}
+	return c
+}
+
 // WithTimeSelector 时间选择器, 毫秒时间戳
 // 区间: [startTime, endTime)
 func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *Filter {
@@ -164,7 +179,7 @@ func (c *Filter) WithTimeSelector(key string, startTime int64, endTime int64) *F
 
 // GetExpression 获取SQL表达式
 func (c *Filter) GetExpression() string {
-	if c.builder.Len() == 0 {
+	if c.IsEmpty() {
 		return "1=1"
 	}
 	return c.builder.String()

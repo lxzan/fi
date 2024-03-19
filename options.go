@@ -20,8 +20,8 @@ type (
 
 	option struct {
 		SkipZeroValue bool // 是否跳过空值
-		Size          int  // 是否加反引号
-		Quote         bool // 预估字段数量
+		Size          int  // 预估字段数量
+		Quote         bool // 是否加反引号
 	}
 )
 
