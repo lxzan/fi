@@ -47,6 +47,14 @@ func NewQuery(options ...Option) *Filter {
 	}
 }
 
+// Clone 拷贝一个副本
+func (c *Filter) Clone() *Filter {
+	var d = &Filter{conf: c.conf}
+	d.Args = append(d.Args, c.Args...)
+	d.builder.WriteString(c.builder.String())
+	return d
+}
+
 func (c *Filter) push(key string, val any, cmp string) *Filter {
 	if v, ok := val.(Valuer); ok {
 		val = v.Value()
