@@ -201,3 +201,9 @@ func TestNewQuery(t *testing.T) {
 		assert.Equal(t, f.conf.Size, 3)
 	})
 }
+
+func TestFilter_Clone(t *testing.T) {
+	var a = NewFilter(WithQuote(false)).Eq("name", 1).Eq("age", 2).Clone()
+	assert.Equal(t, a.GetExpression(), "name = ? AND age = ?")
+	assert.Equal(t, len(a.Args), 2)
+}
