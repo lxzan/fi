@@ -2,8 +2,8 @@
 
 [![Build Status][1]][2] [![MIT licensed][3]][4] [![Go Version][5]][6] [![codecov][7]][8] [![Go Report Card][9]][10]
 
-[1]: https://github.com/lxzan/fi/workflows/Go%20Test/badge.svg?branch=main
-[2]: https://github.com/lxzan/fi/actions?query=branch%3Amain
+[1]: https://github.com/lxzan/fi/actions/workflows/go.yml/badge.svg
+[2]: https://github.com/lxzan/fi/actions/workflows/go.yml
 [3]: https://img.shields.io/badge/license-MIT-blue.svg
 [4]: LICENSE
 [5]: https://img.shields.io/badge/go-%3E%3D1.18-30dff3?style=flat-square&logo=go
